@@ -1,0 +1,87 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:phone_shop/common/app_style.dart';
+import 'package:phone_shop/common/custom_button.dart';
+import 'package:phone_shop/common/custom_textfield.dart';
+import 'package:phone_shop/common/reusable_text.dart';
+import 'package:phone_shop/constants/constants.dart';
+import 'package:phone_shop/views/auth/verification_page.dart';
+
+class PhoneWidget extends StatelessWidget {
+  const PhoneWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 20.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ReusableText(
+            text: 'Sign in with your phone number',
+            style: appStyle(
+              14,
+              kDark,
+              FontWeight.normal,
+            ),
+          ),
+          SizedBox(height: 20.h),
+          CustomTextWidget(
+            keyBoardType: TextInputType.emailAddress,
+            hintText: 'Phone number',
+            prefixIcon: Icon(
+              Icons.phone_android_rounded,
+              color: kGray,
+              size: 18.sp,
+            ),
+          ),
+          SizedBox(height: 20.h),
+          CustomButton(
+            text: 'Get verification code',
+            btnHeight: 40.h,
+            radius: 20.r,
+            onTap: () {
+              Get.to(() => const VerificationPage());
+            },
+          ),
+          SizedBox(height: 20.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: width * 0.35,
+                height: 1.h,
+                color: kDark,
+              ),
+              ReusableText(
+                text: 'OR',
+                style: appStyle(
+                  14,
+                  kDark,
+                  FontWeight.normal,
+                ),
+              ),
+              Container(
+                width: width * 0.35,
+                height: 1.h,
+                color: kDark,
+              ),
+            ],
+          ),
+          SizedBox(height: 20.h),
+          CustomButton(
+            text: 'Sign in with Google',
+            btnHeight: 40.h,
+            btnBorderWidth: 1,
+            btnColor: kWhite,
+            textColor: kDark,
+            hasIcon: true,
+            imagePath: 'assets/icons/google.png',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+}

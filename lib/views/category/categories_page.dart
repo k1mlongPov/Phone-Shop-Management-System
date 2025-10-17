@@ -6,7 +6,7 @@ class CategoriesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Scaffold(body: Center(child: Text("Category"))),
+      body: Text(""),
     );
   }
 }

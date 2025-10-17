@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:phone_shop/common/app_style.dart';
 import 'package:phone_shop/common/reusable_text.dart';
 import 'package:phone_shop/constants/constants.dart';
-import 'package:phone_shop/controllers/auth_switch_controller.dart';
+import 'package:phone_shop/controllers/switch_controller.dart';
 import 'package:phone_shop/views/auth/widgets/email_phone_switch.dart';
 import 'package:phone_shop/views/auth/widgets/email_widget.dart';
 import 'package:phone_shop/views/auth/widgets/phone_widget.dart';
@@ -14,8 +14,7 @@ class LoginWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthSwitchController switchController =
-        Get.put(AuthSwitchController());
+    final SwitchController switchController = Get.put(SwitchController());
     return Expanded(
       child: Container(
         width: double.infinity,
@@ -42,7 +41,7 @@ class LoginWidget extends StatelessWidget {
                 EmailPhoneSwitch(),
                 Obx(
                   () {
-                    return switchController.isEmail.value
+                    return switchController.isSwitch.value
                         ? const EmailWidget()
                         : const PhoneWidget();
                   },

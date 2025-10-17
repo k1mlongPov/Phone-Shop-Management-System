@@ -6,13 +6,13 @@ import 'package:phone_shop/common/reusable_text.dart';
 import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/controllers/switch_controller.dart';
 
-class EmailPhoneSwitch extends StatelessWidget {
+class PhonesAccessoriesSwitch extends StatelessWidget {
   final SwitchController controller = Get.put(SwitchController());
 
   final double height;
   final double width;
 
-  EmailPhoneSwitch({
+  PhonesAccessoriesSwitch({
     super.key,
     this.height = 44,
     this.width = 375,
@@ -24,7 +24,7 @@ class EmailPhoneSwitch extends StatelessWidget {
 
     return Obx(
       () {
-        final isEmail = controller.isSwitch.value;
+        final isPhone = controller.isSwitch.value;
         return SizedBox(
           width: width,
           height: height,
@@ -44,7 +44,7 @@ class EmailPhoneSwitch extends StatelessWidget {
                   duration: const Duration(milliseconds: 600),
                   curve: Curves.easeOutCubic,
                   alignment:
-                      isEmail ? Alignment.centerLeft : Alignment.centerRight,
+                      isPhone ? Alignment.centerLeft : Alignment.centerRight,
                   child: Container(
                     width: width / 2,
                     height: height - 4,
@@ -70,15 +70,15 @@ class EmailPhoneSwitch extends StatelessWidget {
                             children: [
                               Icon(Icons.email,
                                   size: 16.r,
-                                  color: isEmail
+                                  color: isPhone
                                       ? kBlue.withOpacity(0.5)
                                       : Theme.of(context).iconTheme.color),
                               SizedBox(width: 8.w),
                               ReusableText(
-                                text: 'Email',
+                                text: 'Phones',
                                 style: appStyle(
                                   14,
-                                  isEmail ? kBlue.withOpacity(0.5) : kDark,
+                                  isPhone ? kBlue.withOpacity(0.5) : kDark,
                                   FontWeight.normal,
                                 ),
                               ),
@@ -97,15 +97,15 @@ class EmailPhoneSwitch extends StatelessWidget {
                             children: [
                               Icon(Icons.phone_android,
                                   size: 16.r,
-                                  color: !isEmail
+                                  color: !isPhone
                                       ? kBlue.withOpacity(0.5)
                                       : Theme.of(context).iconTheme.color),
                               SizedBox(width: 8.w),
                               ReusableText(
-                                text: 'Phone number',
+                                text: 'Accessories',
                                 style: appStyle(
                                   14,
-                                  !isEmail ? kBlue.withOpacity(0.5) : kDark,
+                                  !isPhone ? kBlue.withOpacity(0.5) : kDark,
                                   FontWeight.normal,
                                 ),
                               ),

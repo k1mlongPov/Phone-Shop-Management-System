@@ -25,65 +25,68 @@ class DashboardPage extends StatelessWidget {
       ),
       body: CustomContainer(
         color: kWhite,
-        containerContent: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 10.h,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 18.w),
-              child: ReusableText(
-                text: 'Dashboard',
-                style: appStyle(22, kDark, FontWeight.bold),
+        containerContent: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 10.h,
               ),
-            ),
-            SizedBox(
-              height: 5.h,
-            ),
-            const Dashboard(),
-            SizedBox(
-              height: 10.h,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 18.w, right: 18.w),
-              child: ReusableText(
-                text: 'Profit Overview',
-                style: appStyle(22, kDark, FontWeight.bold),
+              Padding(
+                padding: EdgeInsets.only(left: 18.w),
+                child: ReusableText(
+                  text: 'Dashboard',
+                  style: appStyle(22, kDark, FontWeight.bold),
+                ),
               ),
-            ),
-            SizedBox(
-              height: 10.h,
-            ),
-            MonthlyProfitChart(),
-            SizedBox(
-              height: 10.h,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 18.w, right: 18.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ReusableText(
-                    text: 'Low stock items',
-                    style: appStyle(22, kDark, FontWeight.bold),
-                  ),
-                  Image(
-                    width: 20.w,
-                    height: 20.h,
-                    image: const AssetImage('assets/icons/categories_icon.png'),
-                  ),
-                ],
+              SizedBox(
+                height: 5.h,
               ),
-            ),
-            SizedBox(
-              height: 10.h,
-            ),
-            LowStockItems(controller: controller),
-            SizedBox(
-              height: 30.h,
-            ),
-          ],
+              Dashboard(),
+              SizedBox(
+                height: 10.h,
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 18.w, right: 18.w),
+                child: ReusableText(
+                  text: 'Profit Overview',
+                  style: appStyle(22, kDark, FontWeight.bold),
+                ),
+              ),
+              SizedBox(
+                height: 10.h,
+              ),
+              MonthlyProfitChart(),
+              SizedBox(
+                height: 10.h,
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 18.w, right: 18.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ReusableText(
+                      text: 'Low stock items',
+                      style: appStyle(22, kDark, FontWeight.bold),
+                    ),
+                    Image(
+                      width: 20.w,
+                      height: 20.h,
+                      image:
+                          const AssetImage('assets/icons/categories_icon.png'),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10.h,
+              ),
+              LowStockItems(controller: controller),
+              SizedBox(
+                height: 30.h,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,3 @@
-// lib/models/phone_model.dart
-
 import 'dart:convert';
 
 import 'package:phone_shop/models/specs_model.dart';

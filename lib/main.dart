@@ -27,8 +27,6 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           theme: ThemeData(
             splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            // other theme properties
           ),
           debugShowCheckedModeBanner: false,
           home: child,

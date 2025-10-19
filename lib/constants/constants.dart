@@ -12,4 +12,4 @@ const kLightGray = Color(0xFFF6F6F6);
 double hieght = 825.h;
 double width = 375.w;
 
-const String appBaseUrl = "http://10.0.2.2:5000";
+const String appBaseUrl = "http://192.168.101.179:5000";

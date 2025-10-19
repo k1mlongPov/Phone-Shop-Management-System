@@ -1,36 +1,80 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:phone_shop/constants/constants.dart';
+import 'package:phone_shop/models/accessory_model.dart';
+import 'package:phone_shop/models/category_model.dart';
+import 'package:phone_shop/models/phone_model.dart';
 
 class DashboardController extends GetxController {
+  var isLoading = false.obs;
   var totalPhones = 0.obs;
   var totalAccessories = 0.obs;
-  var totalCategories = 0.obs;
-  var totalProfit = 0.0.obs;
+  var totalSubCategories = 0.obs;
+  var totalPurchaseValue = 0.0.obs;
 
-  var lowStockItems = <Map<String, dynamic>>[].obs;
   var monthlyPhoneProfit = <Map<String, dynamic>>[].obs;
   var monthlyAccessoryProfit = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadDashboardData();
+    fetchDashboardData();
     loadMonthlyProfit();
   }
 
-  // 🧠 Later connect to your Node.js API here
-  Future<void> loadDashboardData() async {
-    // Mock data for now
-    await Future.delayed(const Duration(milliseconds: 800));
-    totalPhones.value = 28;
-    totalAccessories.value = 14;
-    totalCategories.value = 7;
-    totalProfit.value = 1350.75;
+  Future<void> fetchDashboardData() async {
+    isLoading.value = true;
+    try {
+      // Fetch phones
+      final phoneRes = await http.get(Uri.parse('$appBaseUrl/api/phones'));
+      if (phoneRes.statusCode == 200) {
+        final decoded = jsonDecode(phoneRes.body);
+        final List<dynamic> phoneData = decoded['data'] ?? [];
+        final phones =
+            List<PhoneModel>.from(phoneData.map((e) => PhoneModel.fromJson(e)));
+        totalPhones.value = phones.length;
 
-    lowStockItems.value = [
-      {'name': 'iPhone 15 Pro', 'stock': 3},
-      {'name': 'Oppo A18', 'stock': 2},
-      {'name': '65W Fast Charger', 'stock': 4},
-    ];
+        // Add up total purchasePrice for phones
+        final phonePurchaseTotal = phones.fold<double>(
+          0.0,
+          (sum, phone) => sum + phone.pricing.purchasePrice,
+        );
+        totalPurchaseValue.value += phonePurchaseTotal;
+      }
+
+      // Fetch accessories
+      final accRes = await http.get(Uri.parse('$appBaseUrl/api/accessories'));
+      if (accRes.statusCode == 200) {
+        final decoded = jsonDecode(accRes.body);
+        final List<dynamic> accData = decoded['data'] ?? [];
+        final accessories = List<AccessoryModel>.from(
+            accData.map((e) => AccessoryModel.fromJson(e)));
+        totalAccessories.value = accessories.length;
+
+        // Add up total purchasePrice for accessories
+        final accPurchaseTotal = accessories.fold<double>(
+          0.0,
+          (sum, acc) => sum + acc.pricing.purchasePrice,
+        );
+        totalPurchaseValue.value += accPurchaseTotal;
+      }
+
+      // Fetch categories
+      final res =
+          await http.get(Uri.parse('$appBaseUrl/api/categories/subcategories'));
+
+      if (res.statusCode == 200) {
+        final List<CategoryModel> subcategories =
+            categoryModelFromJson(res.body);
+        totalSubCategories.value = subcategories.length;
+      }
+    } catch (e) {
+      debugPrintStack();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void loadMonthlyProfit() {

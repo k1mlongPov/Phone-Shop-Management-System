@@ -12,8 +12,7 @@ class AccessoryModel {
   final String name;
   final String type;
   final String? brand;
-  final double purchasePrice;
-  final double sellingPrice;
+  final Pricing pricing;
   final String currency;
   final String? sku;
   final List<String> images;
@@ -26,8 +25,7 @@ class AccessoryModel {
     required this.name,
     required this.type,
     this.brand,
-    required this.purchasePrice,
-    required this.sellingPrice,
+    required this.pricing,
     required this.currency,
     this.sku,
     required this.images,
@@ -37,14 +35,12 @@ class AccessoryModel {
   });
 
   factory AccessoryModel.fromJson(Map<String, dynamic> json) {
-    final pricing = json['pricing'] ?? {};
     return AccessoryModel(
       id: json['_id'],
       name: json['name'],
       type: json['type'],
       brand: json['brand'],
-      purchasePrice: (pricing['purchasePrice'] ?? 0).toDouble(),
-      sellingPrice: (pricing['sellingPrice'] ?? 0).toDouble(),
+      pricing: Pricing.fromJson(json['pricing'] ?? {}),
       currency: json['currency'] ?? 'USD',
       sku: json['sku'],
       images: List<String>.from(json['images'] ?? []),
@@ -59,15 +55,32 @@ class AccessoryModel {
         "name": name,
         "type": type,
         "brand": brand,
-        "pricing": {
-          "purchasePrice": purchasePrice,
-          "sellingPrice": sellingPrice,
-        },
+        "pricing": pricing.toJson(),
         "currency": currency,
         "sku": sku,
         "images": images,
         "isActive": isActive,
         "profitMargin": profitMargin,
         "stock": stock,
+      };
+}
+
+class Pricing {
+  final double purchasePrice;
+  final double sellingPrice;
+
+  Pricing({
+    required this.purchasePrice,
+    required this.sellingPrice,
+  });
+
+  factory Pricing.fromJson(Map<String, dynamic> json) => Pricing(
+        purchasePrice: (json['purchasePrice'] ?? 0).toDouble(),
+        sellingPrice: (json['sellingPrice'] ?? 0).toDouble(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "purchasePrice": purchasePrice,
+        "sellingPrice": sellingPrice,
       };
 }

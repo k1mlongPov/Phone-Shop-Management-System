@@ -68,7 +68,7 @@ class PhonesAccessoriesSwitch extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.email,
+                              Icon(Icons.smartphone,
                                   size: 16.r,
                                   color: isPhone
                                       ? kBlue.withOpacity(0.5)
@@ -95,7 +95,7 @@ class PhonesAccessoriesSwitch extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.phone_android,
+                              Icon(Icons.headphones,
                                   size: 16.r,
                                   color: !isPhone
                                       ? kBlue.withOpacity(0.5)

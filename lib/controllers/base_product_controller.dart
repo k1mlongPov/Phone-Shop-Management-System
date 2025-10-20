@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:phone_shop/controllers/supplier_controller.dart';
 
 abstract class BaseProductController<T> extends GetxController {
   var isLoading = false.obs;
@@ -25,6 +26,8 @@ abstract class BaseProductController<T> extends GetxController {
   void onInit() {
     super.onInit();
     fetchItems(reset: true);
+    final supplierController = Get.find<SupplierController>();
+    supplierController.fetchSuppliers();
 
     // Infinite scroll listener
     scrollController.addListener(() {

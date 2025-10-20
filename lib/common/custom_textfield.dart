@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_shop/common/app_style.dart';
+import 'package:phone_shop/common/reusable_text.dart';
 import 'package:phone_shop/constants/constants.dart';
 
 class CustomTextWidget extends StatelessWidget {
@@ -16,12 +17,14 @@ class CustomTextWidget extends StatelessWidget {
     this.hintText,
     this.onChanged,
     this.label,
+    this.errorText,
   });
 
   final TextInputType? keyBoardType;
   final TextEditingController? controller;
   final String? hintText;
   final String? label;
+  final String? errorText;
   final VoidCallback? onEditingComplete;
   final bool? obscureText;
   final Widget? suffixIcon;
@@ -45,19 +48,30 @@ class CustomTextWidget extends StatelessWidget {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderSide: const BorderSide(width: .6, color: kGray),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(width: .6, color: kGray),
-            borderRadius: BorderRadius.circular(12.r)),
+          borderSide: const BorderSide(width: .6, color: kGray),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: kLightBlue, width: 1),
         ),
         errorBorder: const OutlineInputBorder(
-          borderSide: BorderSide(width: 1, color: Colors.red),
+          borderSide: BorderSide(width: .6, color: Colors.red),
         ),
-        hintText: hintText,
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(width: .6, color: Colors.red),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         labelText: label,
         labelStyle: appStyle(12, kGray, FontWeight.w600),
+        hintText: hintText,
         hintStyle: appStyle(12, kGray, FontWeight.normal),
+        errorText: errorText,
+        errorStyle: appStyle(12, Colors.red, FontWeight.normal),
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon,
         contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
@@ -108,9 +122,9 @@ class CustomTextFieldWithError extends StatelessWidget {
             if (errorText != null)
               Padding(
                 padding: EdgeInsets.only(top: 4.h, left: 4.w),
-                child: Text(
-                  errorText!,
-                  style: appStyle(10, Colors.red, FontWeight.w500),
+                child: ReusableText(
+                  text: errorText!,
+                  style: appStyle(14, Colors.red, FontWeight.w600),
                 ),
               ),
           ],

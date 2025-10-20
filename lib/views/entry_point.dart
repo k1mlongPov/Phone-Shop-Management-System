@@ -22,46 +22,43 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(TapIndexController());
     return Obx(
-      () => SafeArea(
-        top: false,
-        child: Scaffold(
-          body: IndexedStack(
-            index: controller.currentIndex.value,
-            children: pageList,
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: controller.currentIndex.value,
-            onTap: controller.changeTab,
-            selectedItemColor: kWhite,
-            unselectedItemColor: kGray,
-            backgroundColor: kBlue,
-            selectedLabelStyle: appStyle(12, kWhite, FontWeight.w600),
-            elevation: 0,
-            showUnselectedLabels: false,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard),
-                label: 'Dashboard',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.smartphone),
-                label: 'Products',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.category),
-                label: 'Categories',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.bar_chart),
-                label: 'Profit',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
-              ),
-            ],
-          ),
+      () => Scaffold(
+        body: IndexedStack(
+          index: controller.currentIndex.value,
+          children: pageList,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: controller.currentIndex.value,
+          onTap: controller.changeTab,
+          selectedItemColor: kWhite,
+          unselectedItemColor: kGray,
+          backgroundColor: kBlue,
+          selectedLabelStyle: appStyle(12, kWhite, FontWeight.w600),
+          elevation: 0,
+          showUnselectedLabels: false,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.smartphone),
+              label: 'Products',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.category),
+              label: 'Categories',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.bar_chart),
+              label: 'Profit',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
         ),
       ),
     );

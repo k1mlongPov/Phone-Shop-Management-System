@@ -37,22 +37,27 @@ class GenericListView<T> extends StatelessWidget {
         color: kBlue,
         backgroundColor: kWhite,
         onRefresh: controller.refetch,
-        child: ListView.builder(
-          controller: controller.scrollController,
-          shrinkWrap: true,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          itemCount: items.length + (controller.hasMore.value ? 3 : 0),
-          itemBuilder: (context, index) {
-            if (index >= items.length) {
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
-                child: const ProductsShimmerTile(),
-              );
-            }
+        child: Scrollbar(
+          trackVisibility: true,
+          thumbVisibility: true,
+          radius: Radius.circular(10.r),
+          child: ListView.builder(
+            padding: EdgeInsets.only(right: 10.w),
+            controller: controller.scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: items.length + (controller.hasMore.value ? 3 : 0),
+            itemBuilder: (context, index) {
+              if (index >= items.length) {
+                return Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
+                  child: const ProductsShimmerTile(),
+                );
+              }
 
-            return itemBuilder(context, items[index]);
-          },
+              return itemBuilder(context, items[index]);
+            },
+          ),
         ),
       );
     });

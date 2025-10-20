@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:phone_shop/models/specs_model.dart';
+import 'package:phone_shop/models/supplier_model.dart';
 
 List<PhoneModel> phoneModelFromJson(String str) => List<PhoneModel>.from(
     json.decode(str)["data"].map((x) => PhoneModel.fromJson(x)));
@@ -17,6 +17,7 @@ class PhoneModel {
   final Pricing pricing;
   final SpecsModel specs;
   final Category category;
+  final SupplierModel? supplier;
   final List<String> images;
   final int stock;
   final bool isActive;
@@ -30,6 +31,7 @@ class PhoneModel {
     required this.pricing,
     required this.specs,
     required this.category,
+    this.supplier,
     required this.images,
     required this.stock,
     required this.isActive,
@@ -44,6 +46,11 @@ class PhoneModel {
         pricing: Pricing.fromJson(json['pricing'] ?? {}),
         specs: SpecsModel.fromJson(json['specs'] ?? {}),
         category: Category.fromJson(json['category'] ?? {}),
+        supplier: json['supplier'] != null &&
+                json['supplier'] is Map<String, dynamic> &&
+                json['supplier'].isNotEmpty
+            ? SupplierModel.fromJson(json['supplier'])
+            : null,
         images: List<String>.from(json['images'] ?? []),
         stock: json['stock'] ?? 0,
         isActive: json['isActive'] ?? false,
@@ -58,6 +65,8 @@ class PhoneModel {
         "pricing": pricing.toJson(),
         "specs": specs.toJson(),
         "category": category.toJson(),
+        if (supplier != null)
+          "supplier": supplier!.toJson(), // ✅ only include if not null
         "images": List<dynamic>.from(images.map((x) => x)),
         "stock": stock,
         "isActive": isActive,

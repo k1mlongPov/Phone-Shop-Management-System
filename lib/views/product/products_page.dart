@@ -9,11 +9,14 @@ import 'package:phone_shop/controllers/base_product_controller.dart';
 import 'package:phone_shop/controllers/category_controller.dart';
 import 'package:phone_shop/controllers/phone_controller.dart';
 import 'package:phone_shop/controllers/subcategory_controller.dart';
+import 'package:phone_shop/controllers/supplier_controller.dart';
 import 'package:phone_shop/controllers/switch_controller.dart';
 import 'package:phone_shop/views/product/add_phone_screen.dart';
 import 'package:phone_shop/views/product/phones_accessories_switch.dart';
-import 'package:phone_shop/views/product/widgets/product_category_widget.dart';
+import 'package:phone_shop/views/product/widgets/accessory_list_view.dart';
+import 'package:phone_shop/views/product/widgets/phone_list_view.dart';
 import 'package:phone_shop/views/product/widgets/search_and_filter_widget.dart';
+import 'package:phone_shop/views/product/widgets/subcategories_widget.dart';
 
 class ProductsPage extends StatelessWidget {
   ProductsPage({super.key});
@@ -23,6 +26,7 @@ class ProductsPage extends StatelessWidget {
   final subcategoryController = Get.put(SubCategoryController());
   final phoneController = Get.put(PhoneController());
   final accessoryController = Get.put(AccessoryController());
+  final supplierController = Get.put(SupplierController());
 
   final sortOptions = {
     '': 'Default',
@@ -43,34 +47,44 @@ class ProductsPage extends StatelessWidget {
         preferredSize: Size.fromHeight(80.h),
         child: const CustomAppbar(),
       ),
-      body: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(10),
-        children: [
-          SizedBox(height: 10.h),
-          Obx(() {
-            final BaseProductController<dynamic> controller =
-                switchController.isSwitch.value
-                    ? phoneController
-                    : accessoryController;
+      body: Container(
+        padding: EdgeInsets.all(12.r),
+        width: width,
+        child: Column(
+          children: [
+            SizedBox(height: 10.h),
+            Obx(() {
+              final BaseProductController<dynamic> controller =
+                  switchController.isSwitch.value
+                      ? phoneController
+                      : accessoryController;
 
-            return SearchAndFilterWidget(
-              controller: controller,
-              sortOptions: sortOptions,
-            );
-          }),
-          SizedBox(height: 10.h),
-          PhonesAccessoriesSwitch(),
-          SizedBox(height: 10.h),
-          Obx(
-            () {
-              return ProductCategoryWidget(
-                title:
-                    switchController.isSwitch.value ? 'Phones' : 'Accessories',
+              return SearchAndFilterWidget(
+                controller: controller,
+                sortOptions: sortOptions,
               );
-            },
-          ),
-        ],
+            }),
+            SizedBox(height: 10.h),
+            PhonesAccessoriesSwitch(),
+            SizedBox(height: 10.h),
+            SubcategoryWidget(
+              onChanged: (selected) {
+                final phoneController = Get.find<PhoneController>();
+                phoneController.selectSubcategory(selected.id);
+                final accessoryController = Get.find<AccessoryController>();
+                accessoryController.selectSubcategory(selected.id);
+              },
+            ),
+            SizedBox(height: 16.h),
+            Obx(
+              () => Expanded(
+                child: switchController.isSwitch.value
+                    ? PhoneListView()
+                    : AccessoryListView(),
+              ),
+            )
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: kBlue.withOpacity(.7),
@@ -122,7 +136,7 @@ class ProductsPage extends StatelessWidget {
                   color: kBlue,
                   onTap: () {
                     Navigator.pop(context);
-                    Get.to(() => const AddPhoneScreen());
+                    Get.to(() => AddPhoneScreen());
                     debugPrint("Add Phone tapped");
                   },
                 ),

@@ -26,17 +26,18 @@ class SearchAndFilterWidget<T> extends StatelessWidget {
         children: [
           // 🔍 Search Box
           SizedBox(
-              width: 210.w,
-              height: 45.h,
-              child: CustomTextWidget(
-                onChanged: (value) => controller.search(value.trim()),
-                hintText: 'Search Products...',
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: 20.r,
-                  color: kGray,
-                ),
-              )),
+            width: 210.w,
+            height: 45.h,
+            child: CustomTextWidget(
+              onChanged: (value) => controller.search(value.trim()),
+              hintText: 'Search Products...',
+              prefixIcon: Icon(
+                Icons.search,
+                size: 20.r,
+                color: kGray,
+              ),
+            ),
+          ),
 
           // ↕️ Sort Dropdown
           Obx(() {
@@ -52,7 +53,7 @@ class SearchAndFilterWidget<T> extends StatelessWidget {
                 height: 45.h,
                 padding: EdgeInsets.symmetric(horizontal: 8.w),
                 decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: kGray),
+                  border: Border.all(width: .6, color: kGray),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Row(
@@ -103,9 +104,9 @@ class SearchAndFilterWidget<T> extends StatelessWidget {
                 Container(
                   height: 50.h,
                   alignment: Alignment.center,
-                  child: Text(
-                    'Sort Options',
-                    style: appStyle(14, kDark, FontWeight.bold),
+                  child: ReusableText(
+                    text: 'Sort Options',
+                    style: appStyle(16, kDark, FontWeight.w600),
                   ),
                 ),
                 const Divider(height: 1),
@@ -119,10 +120,10 @@ class SearchAndFilterWidget<T> extends StatelessWidget {
                       final label = entry.value;
 
                       return ListTile(
-                        title: Text(
-                          label,
+                        title: ReusableText(
+                          text: label,
                           style: appStyle(
-                            13,
+                            12,
                             kDark,
                             key == controller.sortOption.value
                                 ? FontWeight.bold

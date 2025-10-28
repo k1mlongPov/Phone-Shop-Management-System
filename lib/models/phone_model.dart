@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:phone_shop/models/category_model.dart';
+import 'package:phone_shop/models/pricing_model.dart';
 import 'package:phone_shop/models/specs_model.dart';
 import 'package:phone_shop/models/supplier_model.dart';
+import 'package:phone_shop/models/variant_form_data.dart';
 
 List<PhoneModel> phoneModelFromJson(String str) => List<PhoneModel>.from(
     json.decode(str)["data"].map((x) => PhoneModel.fromJson(x)));
@@ -16,11 +19,14 @@ class PhoneModel {
   final String currency;
   final Pricing pricing;
   final SpecsModel specs;
-  final Category category;
+  final CategoryModel category;
   final SupplierModel? supplier;
   final List<String> images;
   final int stock;
   final bool isActive;
+  final int lowStockThreshold;
+  final double? batteryHealth;
+  final List<VariantFormData> variants;
 
   PhoneModel({
     required this.id,
@@ -35,6 +41,9 @@ class PhoneModel {
     required this.images,
     required this.stock,
     required this.isActive,
+    required this.lowStockThreshold,
+    this.batteryHealth,
+    required this.variants,
   });
 
   factory PhoneModel.fromJson(Map<String, dynamic> json) => PhoneModel(
@@ -42,10 +51,10 @@ class PhoneModel {
         brand: json['brand'] ?? '',
         model: json['model'] ?? '',
         slug: json['slug'] ?? '',
-        currency: json['currency'] ?? '',
+        currency: json['currency'] ?? 'USD',
         pricing: Pricing.fromJson(json['pricing'] ?? {}),
         specs: SpecsModel.fromJson(json['specs'] ?? {}),
-        category: Category.fromJson(json['category'] ?? {}),
+        category: CategoryModel.fromJson(json['category'] ?? {}),
         supplier: json['supplier'] != null &&
                 json['supplier'] is Map<String, dynamic> &&
                 json['supplier'].isNotEmpty
@@ -53,9 +62,16 @@ class PhoneModel {
             : null,
         images: List<String>.from(json['images'] ?? []),
         stock: json['stock'] ?? 0,
-        isActive: json['isActive'] ?? false,
+        isActive: json['isActive'] ?? true,
+        lowStockThreshold: json['lowStockThreshold'] ?? 5,
+        batteryHealth: (json['specs']?['batteryHealth'] ?? 0).toDouble(),
+        variants: json['variants'] != null
+            ? List<VariantFormData>.from((json['variants'] as List)
+                .map((v) => VariantFormData.fromJson(v)))
+            : [],
       );
 
+  // ✅ To JSON (for update)
   Map<String, dynamic> toJson() => {
         "_id": id,
         "brand": brand,
@@ -65,50 +81,11 @@ class PhoneModel {
         "pricing": pricing.toJson(),
         "specs": specs.toJson(),
         "category": category.toJson(),
-        if (supplier != null)
-          "supplier": supplier!.toJson(), // ✅ only include if not null
+        "supplier": supplier?.toJson(),
         "images": List<dynamic>.from(images.map((x) => x)),
         "stock": stock,
         "isActive": isActive,
-      };
-}
-
-class Pricing {
-  final double purchasePrice;
-  final double sellingPrice;
-
-  Pricing({
-    required this.purchasePrice,
-    required this.sellingPrice,
-  });
-
-  factory Pricing.fromJson(Map<String, dynamic> json) => Pricing(
-        purchasePrice: (json['purchasePrice'] ?? 0).toDouble(),
-        sellingPrice: (json['sellingPrice'] ?? 0).toDouble(),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "purchasePrice": purchasePrice,
-        "sellingPrice": sellingPrice,
-      };
-}
-
-class Category {
-  final String id;
-  final String name;
-
-  Category({
-    required this.id,
-    required this.name,
-  });
-
-  factory Category.fromJson(Map<String, dynamic> json) => Category(
-        id: json['_id'] ?? '',
-        name: json['name'] ?? '',
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "name": name,
+        "lowStockThreshold": lowStockThreshold,
+        "variants": variants.map((v) => v.toJson()).toList(),
       };
 }

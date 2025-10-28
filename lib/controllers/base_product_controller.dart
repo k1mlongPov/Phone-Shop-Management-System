@@ -147,6 +147,11 @@ abstract class BaseProductController<T> extends GetxController {
     );
   }
 
+  void resetFilter() {
+    selectedSubcategoryId.value = '';
+    fetchItems(reset: true);
+  }
+
   @override
   void onClose() {
     _debounce?.cancel();

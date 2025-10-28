@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:phone_shop/common/show_confirm_dialog.dart';
 import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/controllers/phone_controller.dart';
+import 'package:phone_shop/controllers/switch_controller.dart';
 import 'package:phone_shop/models/phone_model.dart';
 import 'package:phone_shop/views/product/edit_phone_screen.dart';
 import 'package:phone_shop/views/product/generic_list_view.dart';
@@ -14,6 +15,7 @@ class PhoneListView extends StatelessWidget {
   PhoneListView({super.key});
 
   final phoneController = Get.find<PhoneController>();
+  final switchController = Get.find<SwitchController>();
 
   @override
   Widget build(BuildContext context) {

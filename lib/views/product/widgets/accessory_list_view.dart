@@ -4,7 +4,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/controllers/accessory_controller.dart';
+import 'package:phone_shop/controllers/switch_controller.dart';
 import 'package:phone_shop/models/accessory_model.dart';
+import 'package:phone_shop/views/product/edit_accessory_screen.dart';
 import 'package:phone_shop/views/product/generic_list_view.dart';
 import 'package:phone_shop/views/product/widgets/product_tile.dart';
 
@@ -12,6 +14,7 @@ class AccessoryListView extends StatelessWidget {
   AccessoryListView({super.key});
 
   final accessoryController = Get.find<AccessoryController>();
+  final switchController = Get.find<SwitchController>();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,16 @@ class AccessoryListView extends StatelessWidget {
               motion: const ScrollMotion(),
               children: [
                 SlidableAction(
-                  onPressed: (_) {},
+                  onPressed: (_) async {
+                    final result = await Get.to(
+                      () => EditAccessoryScreen(
+                        accessory: accessory,
+                      ),
+                    );
+                    if (result == true) {
+                      accessoryController.refetch(); // refresh updated list
+                    }
+                  },
                   backgroundColor: kBlue.withOpacity(.8),
                   foregroundColor: kWhite,
                   icon: Icons.edit,

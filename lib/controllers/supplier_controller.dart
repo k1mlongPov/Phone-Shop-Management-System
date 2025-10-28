@@ -5,95 +5,120 @@ import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/models/supplier_model.dart';
 
 class SupplierController extends GetxController {
-  var suppliers = <SupplierModel>[].obs;
   var isLoading = false.obs;
+  var suppliers = <SupplierModel>[].obs;
   var selectedSupplierId = ''.obs;
 
-  final String endpoint = '$appBaseUrl/api/suppliers';
-
-  @override
-  void onInit() {
-    super.onInit();
-    fetchSuppliers();
-  }
-
+  /// ✅ Fetch all suppliers
   Future<void> fetchSuppliers() async {
+    isLoading.value = true;
     try {
-      isLoading.value = true;
-      final res = await http.get(Uri.parse('$appBaseUrl/api/suppliers'));
-      if (res.statusCode == 200) {
-        suppliers.assignAll(supplierModelFromJson(res.body));
+      final response = await http.get(Uri.parse('$appBaseUrl/api/suppliers'));
+
+      if (response.statusCode == 200) {
+        suppliers.value = supplierModelFromJson(response.body);
+      } else {
+        Get.snackbar('Error', 'Failed to fetch suppliers');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load suppliers: $e');
+      Get.snackbar('Error', 'Unable to load suppliers: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<bool> addSupplier(SupplierModel supplier) async {
+  /// ✅ Add new supplier
+  Future<void> addSupplier(
+    String name,
+    String contactName,
+    String email,
+    String phone,
+    String address,
+  ) async {
     try {
-      final response = await http.post(
-        Uri.parse(endpoint),
+      final res = await http.post(
+        Uri.parse('$appBaseUrl/api/suppliers'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(supplier.toJson()),
+        body: jsonEncode({
+          'name': name,
+          'contactName': contactName,
+          'email': email,
+          'phone': phone,
+          'address': address,
+        }),
       );
-      if (response.statusCode == 201) {
-        await fetchSuppliers();
+
+      if (res.statusCode == 201) {
         Get.snackbar('Success', 'Supplier added successfully');
-        return true;
+        await fetchSuppliers();
       } else {
-        Get.snackbar('Error', 'Failed to add supplier');
-        return false;
+        final msg = jsonDecode(res.body)['message'] ?? 'Failed to add supplier';
+        Get.snackbar('Error', msg);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Error adding supplier: $e');
-      return false;
+      Get.snackbar('Error', 'Failed to add supplier: $e');
     }
   }
 
-  Future<bool> updateSupplier(String id, SupplierModel supplier) async {
+  /// ✅ Update supplier by ID
+  Future<bool> updateSupplier({
+    required String id,
+    required String name,
+    required String contactName,
+    required String email,
+    required String phone,
+    required bool active,
+  }) async {
     try {
-      final response = await http.put(
-        Uri.parse('$endpoint/$id'),
+      final res = await http.put(
+        Uri.parse('$appBaseUrl/api/suppliers/update/$id'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(supplier.toJson()),
+        body: jsonEncode({
+          'name': name,
+          'contactName': contactName,
+          'email': email,
+          'phone': phone,
+          'active': active,
+        }),
       );
 
-      if (response.statusCode == 200) {
+      if (res.statusCode == 200) {
         await fetchSuppliers();
         Get.snackbar('Success', 'Supplier updated successfully');
         return true;
       } else {
-        Get.snackbar('Error', 'Failed to update supplier');
+        final msg =
+            jsonDecode(res.body)['message'] ?? 'Failed to update supplier';
+        Get.snackbar('Error', msg);
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Error updating supplier: $e');
+      Get.snackbar('Error', 'Failed to update supplier: $e');
       return false;
     }
   }
 
-  Future<bool> deleteSupplier(String id) async {
+  /// ✅ Delete supplier by ID
+  Future<void> deleteSupplier(String id) async {
     try {
-      final response = await http.delete(Uri.parse('$endpoint/$id'));
-      if (response.statusCode == 200) {
+      final res =
+          await http.delete(Uri.parse('$appBaseUrl/api/suppliers/delete/$id'));
+
+      if (res.statusCode == 200) {
         suppliers.removeWhere((s) => s.id == id);
-        Get.snackbar('Success', 'Supplier deleted');
-        return true;
+        Get.snackbar('Deleted', 'Supplier deleted successfully');
       } else {
-        Get.snackbar('Error', 'Failed to delete supplier');
-        return false;
+        final msg =
+            jsonDecode(res.body)['message'] ?? 'Failed to delete supplier';
+        Get.snackbar('Error', msg);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Error deleting supplier: $e');
-      return false;
+      Get.snackbar('Error', 'Failed to delete supplier: $e');
     }
   }
 
-  /// ✅ Helper method: get currently selected supplier
-  SupplierModel? get selectedSupplier {
-    if (selectedSupplierId.value.isEmpty) return null;
-    return suppliers.firstWhereOrNull((s) => s.id == selectedSupplierId.value);
+  /// ✅ Get supplier by ID (for edit form)
+  SupplierModel? getById(String id) {
+    return suppliers.firstWhereOrNull((s) => s.id == id);
   }
 }

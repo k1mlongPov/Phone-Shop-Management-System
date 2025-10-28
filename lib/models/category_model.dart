@@ -10,22 +10,22 @@ String categoryModelToJson(List<CategoryModel> data) =>
 class CategoryModel {
   final String id;
   final String name;
-  final String description;
-  final String image;
+  final String? description;
+  final String? image;
   final String? parent;
   final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   CategoryModel({
     required this.id,
     required this.name,
-    required this.description,
-    required this.image,
+    this.description,
+    this.image,
     this.parent,
     required this.isActive,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) => CategoryModel(
@@ -46,8 +46,8 @@ class CategoryModel {
         "image": image,
         "parent": parent,
         "isActive": isActive,
-        "createdAt": createdAt.toIso8601String(),
-        "updatedAt": updatedAt.toIso8601String(),
+        "createdAt": createdAt!.toIso8601String(),
+        "updatedAt": updatedAt!.toIso8601String(),
       };
 
   bool get isParent => parent == null;

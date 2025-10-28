@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProductsShimmer extends StatelessWidget {
-  const ProductsShimmer({super.key});
-
+  const ProductsShimmer({super.key, this.itemCount});
+  final int? itemCount;
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: 6,
+      itemCount: itemCount ?? 6,
       itemBuilder: (_, __) => const ProductsShimmerTile(),
     );
   }

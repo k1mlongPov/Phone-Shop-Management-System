@@ -4,9 +4,12 @@ import 'package:phone_shop/common/app_style.dart';
 import 'package:phone_shop/common/reusable_text.dart';
 import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/controllers/phone_controller.dart';
+import 'package:phone_shop/models/category_model.dart';
 import 'package:phone_shop/models/phone_model.dart';
+import 'package:phone_shop/models/pricing_model.dart';
 import 'package:phone_shop/models/specs_model.dart';
 import 'package:phone_shop/models/supplier_model.dart';
+import 'package:phone_shop/models/variant_form_data.dart';
 import 'package:phone_shop/views/product/widgets/phone_form_widget.dart';
 
 class EditPhoneScreen extends StatelessWidget {
@@ -17,6 +20,7 @@ class EditPhoneScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kWhite,
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Get.back(),
@@ -50,16 +54,43 @@ class EditPhoneScreen extends StatelessWidget {
                   purchasePrice: data.purchasePrice,
                   sellingPrice: data.sellingPrice,
                 ),
-                specs: SpecsModel(chipset: data.chipset, os: data.os),
-                category: Category(id: data.categoryId, name: ''),
-                supplier:
-                    SupplierModel(id: data.supplierId, name: '', active: true),
+                specs: SpecsModel(
+                  chipset: data.chipset,
+                  os: data.os,
+                  batteryHealth: data.batteryHealth, // ✅ new field
+                ),
+                category: CategoryModel(
+                  id: data.categoryId,
+                  name: '',
+                  isActive: true,
+                ),
+                supplier: SupplierModel(
+                  id: data.supplierId,
+                  name: '',
+                  active: true,
+                ),
                 images: data.existingImages,
                 stock: data.stock,
                 isActive: true,
+                lowStockThreshold: data.lowStockThreshold, // ✅ new field
+                batteryHealth: data.batteryHealth, // ✅ new field
+                variants: data.variants
+                    .map(
+                      (v) => VariantFormData(
+                        storage: v.storage,
+                        color: v.color,
+                        pricing: Pricing(
+                          purchasePrice: v.pricing.purchasePrice,
+                          sellingPrice: v.pricing.sellingPrice,
+                        ),
+                        stock: v.stock,
+                      ),
+                    )
+                    .toList(), // ✅ pass your variants list here
               ),
               data.newImages,
             );
+
             Get.back(result: true);
           },
         ),

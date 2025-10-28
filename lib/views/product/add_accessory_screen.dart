@@ -3,14 +3,14 @@ import 'package:get/get.dart';
 import 'package:phone_shop/common/app_style.dart';
 import 'package:phone_shop/common/reusable_text.dart';
 import 'package:phone_shop/constants/constants.dart';
-import 'package:phone_shop/controllers/phone_controller.dart';
+import 'package:phone_shop/controllers/accessory_controller.dart';
 import 'package:phone_shop/controllers/supplier_controller.dart';
-import 'package:phone_shop/models/specs_model.dart';
-import 'package:phone_shop/views/product/widgets/phone_form_widget.dart';
+import 'package:phone_shop/views/product/widgets/accessory_form_widget.dart';
 
-class AddPhoneScreen extends StatelessWidget {
-  AddPhoneScreen({super.key});
-  final controller = Get.find<PhoneController>();
+class AddAccessoryScreen extends StatelessWidget {
+  AddAccessoryScreen({super.key});
+
+  final controller = Get.find<AccessoryController>();
   final supplierController = Get.find<SupplierController>();
 
   @override
@@ -33,30 +33,25 @@ class AddPhoneScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: PhoneFormWidget(
+        child: AccessoryFormWidget(
           onSubmit: (data) async {
             final supplierId = supplierController.selectedSupplierId.value;
-            final success = await controller.addPhone(
+            await controller.addAccessory(
+              name: data.name,
+              type: data.type,
               brand: data.brand,
-              model: data.model,
-              slug: data.slug,
+              sku: data.sku,
               purchasePrice: data.purchasePrice,
               sellingPrice: data.sellingPrice,
-              specs: SpecsModel(chipset: data.chipset, os: data.os),
               categoryId: data.categoryId,
               supplierId: supplierId.isEmpty ? null : supplierId,
               stock: data.stock,
               lowStockThreshold: data.lowStockThreshold,
+              attributes: data.attributes,
+              compatibility: data.compatibility,
               images: data.newImages,
-              variants: data.variants.map((v) => v.toJson()).toList(),
             );
-
-            if (success) {
-              Future.delayed(
-                const Duration(milliseconds: 300),
-                () => Get.back(closeOverlays: true),
-              );
-            }
+            Get.back(result: true);
           },
         ),
       ),

@@ -18,6 +18,7 @@ class CustomTextWidget extends StatelessWidget {
     this.onChanged,
     this.label,
     this.errorText,
+    this.initialValue,
   });
 
   final TextInputType? keyBoardType;
@@ -31,6 +32,7 @@ class CustomTextWidget extends StatelessWidget {
   final Widget? prefixIcon;
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
+  final String? initialValue;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -44,6 +46,7 @@ class CustomTextWidget extends StatelessWidget {
       obscureText: obscureText ?? false,
       style: appStyle(14, kDark, FontWeight.normal),
       validator: validator,
+      initialValue: initialValue,
       onTapOutside: (event) {
         FocusManager.instance.primaryFocus?.unfocus();
       },

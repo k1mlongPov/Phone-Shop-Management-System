@@ -1,33 +1,34 @@
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/models/category_model.dart';
-import 'package:phone_shop/models/api_error.dart';
 
 class CategoryController extends GetxController {
-  var isLoading = false.obs;
   var categories = <CategoryModel>[].obs;
-  var error = Rx<Exception?>(null);
-  var apiError = Rx<ApiError?>(null);
+  var isLoading = false.obs;
+
+  String get endpoint => '$appBaseUrl/api/categories';
 
   @override
   void onInit() {
-    fetchCategories();
     super.onInit();
+    fetchCategories();
   }
 
   Future<void> fetchCategories() async {
-    isLoading.value = true;
     try {
-      final response = await http.get(Uri.parse('$appBaseUrl/api/categories'));
-
+      isLoading.value = true;
+      final response = await http.get(Uri.parse(endpoint));
       if (response.statusCode == 200) {
-        categories.value = categoryModelFromJson(response.body);
+        final List data = jsonDecode(response.body);
+        categories.value =
+            data.map((json) => CategoryModel.fromJson(json)).toList();
       } else {
-        apiError.value = apiErrorFromJson(response.body);
+        Get.snackbar('Error', 'Failed to load categories');
       }
     } catch (e) {
-      error.value = e is Exception ? e : Exception(e.toString());
+      Get.snackbar('Error', 'Failed to fetch categories: $e');
     } finally {
       isLoading.value = false;
     }

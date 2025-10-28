@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:phone_shop/common/app_style.dart';
 import 'package:phone_shop/common/custom_button.dart';
 import 'package:phone_shop/common/custom_textfield.dart';
-import 'package:phone_shop/common/reusable_text.dart';
-import 'package:phone_shop/common/show_confirm_dialog.dart';
 import 'package:phone_shop/constants/constants.dart';
 import 'package:phone_shop/controllers/subcategory_controller.dart';
 import 'package:phone_shop/controllers/supplier_controller.dart';
 import 'package:phone_shop/models/phone_model.dart';
+import 'package:phone_shop/models/pricing_model.dart';
+import 'package:phone_shop/models/variant_form_data.dart';
+import 'package:phone_shop/views/product/widgets/confirm_submit_button.dart';
+import 'package:phone_shop/views/product/widgets/image_picker_grid.dart';
+import 'package:phone_shop/views/product/widgets/supplier_category_selector.dart';
+import 'package:phone_shop/views/product/widgets/variant_form_widget.dart';
 
 class PhoneFormData {
   final String brand;
@@ -24,8 +27,11 @@ class PhoneFormData {
   final String categoryId;
   final String supplierId;
   final int stock;
+  final int lowStockThreshold;
+  final double batteryHealth;
   final List<File> newImages;
   final List<String> existingImages;
+  final List<VariantFormData> variants;
 
   PhoneFormData({
     required this.brand,
@@ -38,8 +44,11 @@ class PhoneFormData {
     required this.categoryId,
     required this.supplierId,
     required this.stock,
+    required this.lowStockThreshold,
+    required this.batteryHealth,
     required this.newImages,
     required this.existingImages,
+    required this.variants,
   });
 }
 
@@ -64,6 +73,38 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
   final subCategoryController = Get.find<SubCategoryController>();
   final supplierController = Get.find<SupplierController>();
   final picker = ImagePicker();
+  List<VariantFormData> variants = [];
+
+  void _addVariant() {
+    setState(() {
+      variants.add(
+        VariantFormData(
+          storage: '',
+          color: '',
+          pricing: Pricing(purchasePrice: 0, sellingPrice: 0),
+          stock: 0,
+        ),
+      );
+    });
+
+    // Delay for smooth scroll to the bottom (optional)
+    Future.delayed(const Duration(milliseconds: 300), () {
+      Scrollable.ensureVisible(
+        // ignore: use_build_context_synchronously
+        context,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  void _removeVariant(int index) {
+    setState(() => variants.removeAt(index));
+  }
+
+  void _updateVariant(int index, VariantFormData updated) {
+    setState(() => variants[index] = updated);
+  }
 
   // Controllers
   late TextEditingController brandController;
@@ -74,22 +115,18 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
   late TextEditingController stockController;
   late TextEditingController osController;
   late TextEditingController chipsetController;
+  final TextEditingController lowStockController = TextEditingController();
+  final TextEditingController batteryHealthController = TextEditingController();
 
   List<File> newImages = [];
   List<String> existingImages = [];
-  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    final supplierController = Get.find<SupplierController>();
     final phone = widget.initialPhone;
 
-    supplierController.fetchSuppliers().then((_) {
-      if (phone?.supplier != null) {
-        supplierController.selectedSupplierId.value = phone!.supplier!.id;
-      }
-    });
+    // Pre-fill data
     brandController = TextEditingController(text: phone?.brand ?? '');
     modelController = TextEditingController(text: phone?.model ?? '');
     slugController = TextEditingController(text: phone?.slug ?? '');
@@ -101,25 +138,47 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
         TextEditingController(text: phone?.stock.toString() ?? '');
     osController = TextEditingController(text: phone?.specs.os ?? '');
     chipsetController = TextEditingController(text: phone?.specs.chipset ?? '');
+    lowStockController.text =
+        widget.initialPhone?.lowStockThreshold.toString() ?? '5';
+    batteryHealthController.text =
+        widget.initialPhone?.batteryHealth?.toString() ?? '';
     existingImages = List<String>.from(phone?.images ?? []);
-  }
 
-  Future<void> _pickImages() async {
-    final picked = await picker.pickMultiImage(imageQuality: 75);
-    if (picked.isNotEmpty) {
-      setState(() {
-        newImages = picked.map((x) => File(x.path)).toList();
-      });
+    // Supplier prefill
+    supplierController.fetchSuppliers().then((_) {
+      if (phone?.supplier != null) {
+        supplierController.selectedSupplierId.value = phone!.supplier!.id;
+      }
+    });
+
+    // Variants prefill
+    if (phone?.variants != null && phone!.variants.isNotEmpty) {
+      variants = phone.variants
+          .map(
+            (v) => VariantFormData(
+              storage: v.storage,
+              color: v.color,
+              pricing: v.pricing,
+              stock: v.stock,
+            ),
+          )
+          .toList();
     }
   }
 
-  void _autoGenerateSlug() {
-    final brand = brandController.text.trim();
-    final model = modelController.text.trim();
-    if (brand.isNotEmpty && model.isNotEmpty) {
-      slugController.text = '${brand.toLowerCase()}-${model.toLowerCase()}'
-          .replaceAll(RegExp(r'\s+'), '-');
-    }
+  @override
+  void dispose() {
+    brandController.dispose();
+    modelController.dispose();
+    slugController.dispose();
+    purchaseController.dispose();
+    sellingController.dispose();
+    stockController.dispose();
+    osController.dispose();
+    chipsetController.dispose();
+    lowStockController.dispose();
+    batteryHealthController.dispose();
+    super.dispose();
   }
 
   Future<void> _handleSubmit() async {
@@ -128,13 +187,13 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
     final categoryId = subCategoryController.selectedParentId.value.isEmpty
         ? widget.initialPhone?.category.id ?? ''
         : subCategoryController.selectedParentId.value;
-    final supplierId = supplierController.selectedSupplierId.value;
 
     if (categoryId.isEmpty) {
       Get.snackbar('Error', 'Please select a subcategory');
       return;
     }
 
+    final supplierId = supplierController.selectedSupplierId.value;
     final purchasePrice = double.tryParse(purchaseController.text.trim()) ?? 0;
     final sellingPrice = double.tryParse(sellingController.text.trim()) ?? 0;
     final stock = int.tryParse(stockController.text.trim()) ?? 0;
@@ -147,11 +206,14 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
       sellingPrice: sellingPrice,
       os: osController.text.trim(),
       chipset: chipsetController.text.trim(),
+      batteryHealth: double.tryParse(batteryHealthController.text.trim()) ?? 0,
       categoryId: categoryId,
       supplierId: supplierId,
       stock: stock,
+      lowStockThreshold: int.tryParse(lowStockController.text.trim()) ?? 5,
       newImages: newImages,
       existingImages: existingImages,
+      variants: variants,
     );
 
     await widget.onSubmit(data);
@@ -181,125 +243,24 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
                   label: 'Model',
                   hintText: 'e.g. Galaxy S24',
                   validator: (v) => v!.isEmpty ? 'Model required' : null,
-                  onEditingComplete: _autoGenerateSlug,
+                  onEditingComplete: () {
+                    slugController.text =
+                        '${brandController.text.toLowerCase()}-${modelController.text.toLowerCase()}'
+                            .replaceAll(RegExp(r'\s+'), '-');
+                  },
                 ),
                 SizedBox(height: 12.h),
                 CustomTextWidget(
                   controller: slugController,
                   label: 'Slug (auto-generated)',
                   hintText: 'e.g. samsung-galaxy-s24',
-                  validator: (v) => v!.isEmpty ? 'Slug required' : null,
                 ),
                 SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Obx(
-                        () {
-                          final suppliers = supplierController.suppliers;
-
-                          final selectedValue = supplierController
-                                  .selectedSupplierId.value.isNotEmpty
-                              ? supplierController.selectedSupplierId.value
-                              : widget.initialPhone?.supplier?.id;
-
-                          return DropdownButtonFormField<String>(
-                            value: selectedValue != null &&
-                                    suppliers.any((s) => s.id == selectedValue)
-                                ? selectedValue
-                                : null,
-                            items: suppliers
-                                .map(
-                                  (s) => DropdownMenuItem(
-                                    value: s.id,
-                                    child: ReusableText(
-                                      text: s.name,
-                                      style: appStyle(
-                                          12, kDark, FontWeight.normal),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (v) => supplierController
-                                .selectedSupplierId.value = v ?? '',
-                            decoration: InputDecoration(
-                              labelText: 'Supplier',
-                              labelStyle:
-                                  appStyle(12, kDark, FontWeight.normal),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                                borderSide:
-                                    const BorderSide(width: 1, color: kGray),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                                borderSide:
-                                    const BorderSide(width: 1, color: kGray),
-                              ),
-                            ),
-                            validator: (v) => v == null || v.isEmpty
-                                ? 'Select a supplier'
-                                : null,
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Obx(() {
-                        final subCats = subCategoryController.subCategories;
-                        if (subCategoryController.isLoading.value) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (subCats.isEmpty) {
-                          return const Text('No subcategories found');
-                        }
-
-                        return DropdownButtonFormField<String>(
-                          value: subCategoryController
-                                  .selectedParentId.value.isEmpty
-                              ? widget.initialPhone?.category.id
-                              : subCategoryController.selectedParentId.value,
-                          items: subCats
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.id,
-                                  child: ReusableText(
-                                    text: c.name,
-                                    style:
-                                        appStyle(12, kDark, FontWeight.normal),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => subCategoryController
-                              .selectedParentId.value = v ?? '',
-                          decoration: InputDecoration(
-                            labelText: 'Subcategory',
-                            labelStyle: appStyle(12, kDark, FontWeight.normal),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              borderSide: const BorderSide(
-                                width: 1,
-                                color: kGray,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                              borderSide: const BorderSide(
-                                width: 1,
-                                color: kGray,
-                              ),
-                            ),
-                          ),
-                          validator: (v) => v == null || v.isEmpty
-                              ? 'Select a subcategory'
-                              : null,
-                        );
-                      }),
-                    ),
-                  ],
+                // ✅ Supplier + Category selector
+                SupplierCategorySelector(
+                  supplierController: supplierController,
+                  subCategoryController: subCategoryController,
+                  initialItem: widget.initialPhone,
                 ),
                 SizedBox(height: 12.h),
                 Row(
@@ -309,7 +270,8 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
                         controller: purchaseController,
                         label: 'Purchase Price',
                         keyBoardType: TextInputType.number,
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Purchase Price required' : null,
                       ),
                     ),
                     SizedBox(width: 8.w),
@@ -318,7 +280,8 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
                         controller: sellingController,
                         label: 'Selling Price',
                         keyBoardType: TextInputType.number,
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Selling Price required' : null,
                       ),
                     ),
                   ],
@@ -328,7 +291,18 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
                   controller: stockController,
                   label: 'Stock',
                   keyBoardType: TextInputType.number,
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                ),
+                SizedBox(height: 12.h),
+                CustomTextWidget(
+                  controller: lowStockController,
+                  label: 'Low Stock Threshold',
+                  keyBoardType: TextInputType.number,
+                ),
+                SizedBox(height: 12.h),
+                CustomTextWidget(
+                  controller: batteryHealthController,
+                  label: 'Battery Health (%)',
+                  keyBoardType: TextInputType.number,
                 ),
                 SizedBox(height: 12.h),
                 CustomTextWidget(
@@ -343,99 +317,45 @@ class _PhoneFormWidgetState extends State<PhoneFormWidget> {
                   hintText: 'e.g. Snapdragon 8 Gen 3',
                 ),
                 SizedBox(height: 16.h),
-                Text(
-                  'Images',
-                  style: appStyle(14, kDark, FontWeight.w600),
-                ),
+
+                ...variants.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final variant = entry.value;
+                  return VariantFormWidget(
+                    index: index,
+                    variant: variant,
+                    onRemove: _removeVariant,
+                    onUpdate: _updateVariant,
+                  );
+                }),
+
                 SizedBox(height: 8.h),
-                Wrap(
-                  spacing: 8.w,
-                  runSpacing: 8.h,
-                  children: [
-                    // Existing images
-                    ...existingImages.map((url) => Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.r),
-                              child: Image.network(
-                                url,
-                                width: 80.w,
-                                height: 80.w,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () =>
-                                  setState(() => existingImages.remove(url)),
-                              child: Container(
-                                padding: EdgeInsets.all(4.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 16),
-                              ),
-                            ),
-                          ],
-                        )),
-                    // New images
-                    ...newImages.map((file) => Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8.r),
-                              child: Image.file(
-                                file,
-                                width: 80.w,
-                                height: 80.w,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () =>
-                                  setState(() => newImages.remove(file)),
-                              child: Container(
-                                padding: EdgeInsets.all(4.w),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 16),
-                              ),
-                            ),
-                          ],
-                        )),
-                    GestureDetector(
-                      onTap: _pickImages,
-                      child: Container(
-                        width: 80.w,
-                        height: 80.w,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: kGray),
-                        ),
-                        child: const Icon(Icons.add_a_photo_outlined),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 24.h),
                 CustomButton(
-                  btnHeight: 46,
-                  onTap: () {
-                    showConfirmDialog(
-                      context,
-                      title: 'Update Phone',
-                      message: 'Are you sure to update this phone?',
-                      confirmText: 'Update',
-                      confirmColor: kBlue.withOpacity(.8),
-                      onConfirm: _handleSubmit,
-                    );
-                  },
-                  text: widget.isEdit ? 'Update Phone' : 'Add Phone',
+                  btnHeight: 40,
+                  btnWidth: 120,
+                  text: 'Add Variant',
+                  btnColor: kBlue.withOpacity(0.6),
+                  onTap: _addVariant,
+                ),
+
+                SizedBox(height: 16.h),
+
+                // ✅ Image picker
+                ImagePickerGrid(
+                  existingImages: existingImages,
+                  newImages: newImages,
+                  onPick: (files) => setState(() => newImages.addAll(files)),
+                  onRemoveExisting: (url) =>
+                      setState(() => existingImages.remove(url)),
+                  onRemoveNew: (file) => setState(() => newImages.remove(file)),
+                ),
+
+                SizedBox(height: 24.h),
+
+                // ✅ Submit button
+                ConfirmSubmitButton(
+                  isEdit: widget.isEdit,
+                  onConfirm: _handleSubmit,
                 ),
               ],
             ),

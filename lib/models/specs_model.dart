@@ -12,7 +12,7 @@ class SpecsModel {
   final int? storage;
   final DisplaySpec? display;
   final CameraSpec? cameras;
-  final int? batteryMah;
+  final double? batteryHealth;
   final int? chargingW;
   final String? os;
   final List<String>? colors;
@@ -23,7 +23,7 @@ class SpecsModel {
     this.storage,
     this.display,
     this.cameras,
-    this.batteryMah,
+    this.batteryHealth,
     this.chargingW,
     this.os,
     this.colors,
@@ -39,7 +39,7 @@ class SpecsModel {
         cameras: json['cameras'] != null
             ? CameraSpec.fromJson(json['cameras'])
             : null,
-        batteryMah: json['batteryMah'],
+        batteryHealth: json['batteryHealth'],
         chargingW: json['chargingW'],
         os: json['os'],
         colors: json['colors'] != null ? List<String>.from(json['colors']) : [],
@@ -51,7 +51,7 @@ class SpecsModel {
         "storage": storage,
         "display": display?.toJson(),
         "cameras": cameras?.toJson(),
-        "batteryMah": batteryMah,
+        "batteryHealth": batteryHealth,
         "chargingW": chargingW,
         "os": os,
         "colors": colors,
